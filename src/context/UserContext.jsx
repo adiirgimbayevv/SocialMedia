@@ -1,21 +1,26 @@
-import { createContext, useState } from 'react';
+// src/contexts/UserContext.jsx
+import { createContext, useContext, useState } from 'react';
+import apiClient from '../api/apiClient';
 
 export const UserContext = createContext();
 
+export const useUser = () => useContext(UserContext);
+
 export const UserProvider = ({ children }) => {
-  // Список ID пользователей, на которых мы подписаны
   const [following, setFollowing] = useState([]);
 
-  // Функция Подписаться/Отписаться
-  const toggleFollow = (userId) => {
-    if (following.includes(userId)) {
-      // Если уже подписаны — удаляем из списка
-      setFollowing(prev => prev.filter(id => id !== userId));
-      console.log(`Unfollowed user: ${userId}`);
-    } else {
-      // Если не подписаны — добавляем
-      setFollowing(prev => [...prev, userId]);
-      console.log(`Followed user: ${userId}`);
+  const toggleFollow = async (userId) => {
+    try {
+      if (following.includes(userId)) {
+        await apiClient.post(`/users/${userId}/unfollow`);
+        setFollowing(prev => prev.filter(id => id !== userId));
+      } else {
+        await apiClient.post(`/users/${userId}/follow`);
+        setFollowing(prev => [...prev, userId]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка при подписке');
     }
   };
 

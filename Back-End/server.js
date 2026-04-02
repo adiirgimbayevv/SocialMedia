@@ -18,6 +18,9 @@ const {
     deleteComment
 } = require('./controllers/commentsController');
 
+// НОВЫЙ ИМПОРТ ДЛЯ FOLLOW/UNFOLLOW
+const { followUser, unfollowUser } = require('./controllers/usersController');
+
 // --- ИМПОРТЫ MIDDLEWARE ---
 const verifyToken = require('./middlewares/authMiddleware');
 const errorHandler = require('./middlewares/errorHandler');
@@ -53,6 +56,14 @@ app.post('/posts/:postId/comments', verifyToken, createComment);
 // Обновление и удаление идут по ID самого комментария
 app.put('/comments/:id', verifyToken, updateComment);
 app.delete('/comments/:id', verifyToken, deleteComment);
+
+// ==========================================
+//        НОВЫЕ МАРШРУТЫ ДЛЯ ПОДПИСОК (FOLLOW)
+// ==========================================
+
+// --- USERS (FOLLOW/UNFOLLOW) ---
+app.post('/users/:id/follow', verifyToken, followUser);
+app.post('/users/:id/unfollow', verifyToken, unfollowUser);
 
 
 // ==========================================
