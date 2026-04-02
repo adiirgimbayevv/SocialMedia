@@ -1,4 +1,4 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
 // 1. READ ALL для конкретного поста (с пагинацией и JOIN)
 const getPostComments = async (req, res, next) => {
@@ -96,4 +96,4 @@ const deleteComment = async (req, res, next) => {
     }
 };
 
-module.exports = { getPostComments, createComment, updateComment, deleteComment };
+export { getPostComments, createComment, updateComment, deleteComment };

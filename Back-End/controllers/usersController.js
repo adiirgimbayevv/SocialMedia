@@ -1,5 +1,5 @@
 // controllers/usersController.js
-const db = require('../config/db');
+import db from '../config/db.js';
 
 const followUser = async (req, res, next) => {
   try {
@@ -33,4 +33,4 @@ const unfollowUser = async (req, res, next) => {
   }
 };
 
-module.exports = { followUser, unfollowUser };
+export { followUser, unfollowUser };

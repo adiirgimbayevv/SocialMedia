@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,4 +13,4 @@ const verifyToken = (req, res, next) => {
         res.status(403).json({ error: 'token time is waste.' });
     }
 };
-module.exports = verifyToken;
+export default verifyToken;

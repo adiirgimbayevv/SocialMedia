@@ -1,29 +1,30 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+import cors from 'cors';
 
 // --- ИМПОРТЫ КОНТРОЛЛЕРОВ ---
-const { register, login } = require('./controllers/authController');
-const {
+import { register, login } from './controllers/authController.js';
+import {
     getPosts,
     getPostById,
     createPost,
     updatePost,
     deletePost
-} = require('./controllers/postsController');
-const {
+} from './controllers/postsController.js';
+import {
     getPostComments,
     createComment,
     updateComment,
     deleteComment
-} = require('./controllers/commentsController');
+} from './controllers/commentsController.js';
 
 // НОВЫЙ ИМПОРТ ДЛЯ FOLLOW/UNFOLLOW
-const { followUser, unfollowUser } = require('./controllers/usersController');
+import { followUser, unfollowUser } from './controllers/usersController.js';
 
 // --- ИМПОРТЫ MIDDLEWARE ---
-const verifyToken = require('./middlewares/authMiddleware');
-const errorHandler = require('./middlewares/errorHandler');
+import verifyToken from './middlewares/authMiddleware.js';
+import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
 

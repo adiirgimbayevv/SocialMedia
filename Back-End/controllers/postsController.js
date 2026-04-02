@@ -1,4 +1,4 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
 // 1. READ ALL (с пагинацией и JOIN)
 const getPosts = async (req, res, next) => {
@@ -59,7 +59,7 @@ const getPostById = async (req, res, next) => {
 const createPost = async (req, res, next) => {
     try {
         const { content } = req.body;
-        const userId = req.user.id; // Берем id из токена (authMiddleware)
+        const userId = req.user.id;
 
         const result = await db.query(
             'INSERT INTO posts (user_id, content) VALUES ($1, $2) RETURNING *',
@@ -115,4 +115,4 @@ const deletePost = async (req, res, next) => {
     }
 };
 
-module.exports = { getPosts, getPostById, createPost, updatePost, deletePost };
+export { getPosts, getPostById, createPost, updatePost, deletePost };

@@ -1,5 +1,6 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -13,7 +14,7 @@ pool.connect()
     .then(() => console.log('successful connection to PostgreSQL'))
     .catch(err => console.error('error', err.stack));
 
-module.exports = {
+export default {
 // sql injection protection, parametrised queries
     query: (text, params) => pool.query(text, params),
 };
