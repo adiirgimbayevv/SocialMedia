@@ -11,45 +11,65 @@ export const PostProvider = ({ children }) => {
 
   const API_URL = 'http://localhost:3000/api/posts';
 
-  // Получение постов с сервера (с учетом их структуры data и pagination)
+  // Получение ленты постов
   const fetchFeed = async (page = 1) => {
     setLoading(true);
     try {
+      console.log(`Запрос постов с: ${API_URL}?page=${page}`);
       const response = await fetch(`${API_URL}?page=${page}&limit=10`);
-      if (!response.ok) throw new Error('Server error');
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Сервер вернул ошибку:", errorData.message || response.statusText);
+        return;
+      }
       
       const result = await response.json();
-      // У них в контроллере: res.json({ data: result.rows, pagination: ... })
+      console.log("Данные от сервера получены:", result);
+      
+      // У пацанов данные лежат в result.data
       setPosts(result.data || []); 
       setPagination(result.pagination || {});
     } catch (error) {
-      console.error("Could not connect to backend:", error);
-      // Если сервак выключен, оставляем пустой список или старые данные
+      console.error("Критическая ошибка: Сервер на порту 3000 недоступен. Проверьте запущен ли Back-End!");
     } finally {
       setLoading(false);
     }
   };
 
-  // Создание поста (отправляем content, как прописано в их createPost)
+  // Создание нового поста
   const createPost = async (content) => {
+    if (!user) {
+      alert("Ошибка: Вы не авторизованы! user is undefined.");
+      return;
+    }
+
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }) 
+        body: JSON.stringify({ 
+          content,
+          user_id: user.id // Передаем ID текущего юзера
+        }) 
       });
 
       if (response.ok) {
         const newPost = await response.json();
-        // Добавляем новый пост в начало списка вручную для мгновенного обновления
+        console.log("Пост успешно создан в БД:", newPost);
+        // Добавляем пост в список и обновляем ленту
         setPosts((prev) => [newPost, ...prev]);
+        return true;
+      } else {
+        const err = await response.json();
+        console.error("Ошибка при создании поста:", err);
       }
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Не удалось отправить пост на сервер:", error);
     }
   };
 
-  // Удаление поста (по их роуту deletePost)
+  // Удаление поста
   const deletePost = async (postId) => {
     try {
       const response = await fetch(`${API_URL}/${postId}`, {
@@ -57,13 +77,17 @@ export const PostProvider = ({ children }) => {
       });
 
       if (response.ok) {
+        console.log(`Пост ${postId} удален`);
         setPosts((prev) => prev.filter(post => post.id !== postId));
+      } else {
+        console.error("Ошибка при удалении поста");
       }
     } catch (error) {
-      console.error("Delete failed:", error);
+      console.error("Запрос на удаление не дошел до сервера:", error);
     }
   };
 
+  // Загружаем посты при первой загрузке приложения
   useEffect(() => {
     fetchFeed();
   }, []);
