@@ -1,28 +1,35 @@
-import { createContext, useState, useEffect } from 'react';
-
-export const AuthContext = createContext();
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-
- const login = (userData, userToken) => {
-  localStorage.setItem('token', userToken);
-  setToken(userToken);
-  setUser(userData); 
-  setIsAuthenticated(true);
-};
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
+import React, { createContext, useContext, useState, useCallback } from 'react'
+ 
+const AuthContext = createContext(null)
+ 
+export function AuthProvider({ children }) {
+  const [token, setToken]       = useState(() => localStorage.getItem('token'))
+  const [user,  setUser]        = useState(() => {
+    try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
+  })
+ 
+  const login = useCallback((tok, userData) => {
+    localStorage.setItem('token', tok)
+    localStorage.setItem('user',  JSON.stringify(userData))
+    setToken(tok)
+    setUser(userData)
+  }, [])
+ 
+  const logout = useCallback(() => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setToken(null)
+    setUser(null)
+  }, [])
+ 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
+ 
+export function useAuth() {
+  return useContext(AuthContext)
+}
+ 
