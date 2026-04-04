@@ -24,6 +24,8 @@ const register = async (req, res, next) => {
     }
 };
 
+// ... весь код до login ...
+
 const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -46,7 +48,12 @@ const login = async (req, res, next) => {
             { expiresIn: '24h' }
         );
 
-        res.json({ message: 'success', token });
+        // ← ИСПРАВЛЕНИЕ: возвращаем user
+        res.json({ 
+            message: 'success', 
+            token,
+            user: { id: user.id, username: user.username, email: user.email }
+        });
     } catch (error) {
         next(error);
     }
