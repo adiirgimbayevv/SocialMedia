@@ -2,6 +2,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import cors from 'cors';
+import { toggleLike } from './controllers/likesController.js';
+import { getCurrentUser, updateProfile } from './controllers/profileController.js';
+import { getFollowing, getFollowers } from './controllers/followController.js';
 
 // --- ИМПОРТЫ КОНТРОЛЛЕРОВ ---
 import { register, login } from './controllers/authController.js';
@@ -40,37 +43,35 @@ app.use(express.json());
 app.post('/auth/register', register);
 app.post('/auth/login', login);
 
-// --- POSTS (CRUD) ---
-// Пример получения с пагинацией: GET /posts?page=1&limit=10
+// --- POSTS ---
 app.get('/posts', verifyToken, getPosts);
 app.get('/posts/:id', verifyToken, getPostById);
 app.post('/posts', verifyToken, createPost);
 app.put('/posts/:id', verifyToken, updatePost);
 app.delete('/posts/:id', verifyToken, deletePost);
 
-// --- COMMENTS (CRUD) ---
-// Чтение и создание привязаны к конкретному посту
-// Пример получения с пагинацией: GET /posts/1/comments?page=1&limit=10
+// --- COMMENTS (полный CRUD) ---
 app.get('/posts/:postId/comments', verifyToken, getPostComments);
 app.post('/posts/:postId/comments', verifyToken, createComment);
-
-// Обновление и удаление идут по ID самого комментария
 app.put('/comments/:id', verifyToken, updateComment);
 app.delete('/comments/:id', verifyToken, deleteComment);
 
-// ==========================================
-//        НОВЫЕ МАРШРУТЫ ДЛЯ ПОДПИСОК (FOLLOW)
-// ==========================================
+// --- LIKES ---
+app.post('/posts/:postId/like', verifyToken, toggleLike);
 
-// --- USERS (FOLLOW/UNFOLLOW) ---
+// --- FOLLOW / UNFOLLOW ---
 app.post('/users/:id/follow', verifyToken, followUser);
 app.post('/users/:id/unfollow', verifyToken, unfollowUser);
 
+// --- PROFILE (новое) ---
+app.get('/users/me', verifyToken, getCurrentUser);           // ← добавь
+app.put('/users/me', verifyToken, updateProfile);  
 
-// ==========================================
-//           ОБРАБОТКА ОШИБОК
-// ==========================================
-// Глобальный обработчик должен идти в самом конце списка app.use()
+// --- FOLLOWERS / FOLLOWING ---
+app.get('/users/me/following', verifyToken, getFollowing);   // ← добавь
+app.get('/users/me/followers', verifyToken, getFollowers);  // ← добавь
+
+// Глобальный обработчик ошибок
 app.use(errorHandler);
 
 // --- ЗАПУСК СЕРВЕРА ---

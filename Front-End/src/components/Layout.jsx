@@ -15,17 +15,21 @@ export default function Layout() {
   return (
     <>
       <nav className={styles.nav}>
-        <Link to="/" className={styles.logo}>Echoes</Link>
+  <Link to="/" className={styles.logo}>Echoes</Link>
 
-        {user && (
-          <div className={styles.userInfo}>
-            <span>@{user.username}</span>
-            <button onClick={handleLogout} className={styles.logoutBtn}>
-              Выйти
-            </button>
-          </div>
-        )}
-      </nav>
+  {user && (
+    <div className={styles.userInfo}>
+      <Link to="/profile" style={{ color: '#863bff', marginRight: '15px' }}>Профиль</Link>
+      <Link to="/profile/following" style={{ color: '#aaa', marginRight: '15px' }}>Подписки</Link>
+      <Link to="/profile/followers" style={{ color: '#aaa', marginRight: '20px' }}>Подписчики</Link>
+      
+      <span>@{user.username}</span>
+      <button onClick={handleLogout} className={styles.logoutBtn}>
+        Выйти
+      </button>
+    </div>
+  )}
+</nav>
 
       <main className={styles.main}>
         <Outlet />

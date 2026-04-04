@@ -1,20 +1,32 @@
+// backend/controllers/postsController.js
 import db from '../config/db.js';
 
-// 1. READ ALL (с пагинацией и JOIN)
+// 1. READ ALL
 const getPosts = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
+        const userId = req.user.id;
 
         const query = `
-            SELECT p.id, p.content, p.created_at, p.user_id, u.username
+            SELECT 
+                p.id, 
+                p.content, 
+                p.created_at, 
+                p.user_id, 
+                u.username,
+                COUNT(l.id) AS likes_count,
+                BOOL_OR(l.user_id = $3) AS liked_by_user
             FROM posts p
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN likes l ON l.post_id = p.id
+            GROUP BY p.id, u.username
             ORDER BY p.created_at DESC
             LIMIT $1 OFFSET $2
         `;
-        const result = await db.query(query, [limit, offset]);
+
+        const result = await db.query(query, [limit, offset, userId]);
 
         const countResult = await db.query('SELECT COUNT(*) FROM posts');
         const totalPosts = parseInt(countResult.rows[0].count);
@@ -33,17 +45,29 @@ const getPosts = async (req, res, next) => {
     }
 };
 
-// 2. READ ONE (с JOIN)
+// 2. READ ONE
 const getPostById = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const userId = req.user.id;
+
         const query = `
-            SELECT p.id, p.content, p.created_at, p.user_id, u.username
+            SELECT 
+                p.id, 
+                p.content, 
+                p.created_at, 
+                p.user_id, 
+                u.username,
+                COUNT(l.id) AS likes_count,
+                BOOL_OR(l.user_id = $2) AS liked_by_user
             FROM posts p
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN likes l ON l.post_id = p.id
             WHERE p.id = $1
+            GROUP BY p.id, u.username
         `;
-        const result = await db.query(query, [id]);
+
+        const result = await db.query(query, [id, userId]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Пост не найден' });
@@ -72,7 +96,7 @@ const createPost = async (req, res, next) => {
     }
 };
 
-// 4. UPDATE (только свой пост)
+// 4. UPDATE
 const updatePost = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -94,7 +118,7 @@ const updatePost = async (req, res, next) => {
     }
 };
 
-// 5. DELETE (только свой пост)
+// 5. DELETE
 const deletePost = async (req, res, next) => {
     try {
         const { id } = req.params;

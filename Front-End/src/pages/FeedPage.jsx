@@ -1,131 +1,42 @@
 import { useContext, useState } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';     // ← исправлено
-import { usePost } from '../context/PostContext.jsx';     // ← используем usePost
+import { usePost } from '../context/PostContext';
+import PostCard from '../components/PostCard';
 
-const FeedPage = () => {
-  const { user } = useAuth();
-  const { posts, loading, createPost, deletePost, pagination, fetchFeed } = usePost();
-
+const Feed = () => {
+  const { posts, loading, createPost } = usePost();
   const [newContent, setNewContent] = useState('');
 
-  const handleCreate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newContent.trim()) return;
-    
     await createPost(newContent);
     setNewContent('');
   };
 
-  if (loading) {
-    return <div style={{ textAlign: 'center', padding: '80px' }}>Загрузка ленты...</div>;
-  }
+  if (loading) return <div style={{ textAlign: 'center', padding: '60px' }}>Загрузка ленты...</div>;
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+    <div>
       {/* Форма создания поста */}
-      <form onSubmit={handleCreate} style={{ 
-        marginBottom: '30px', 
-        background: '#1a1a1a', 
-        padding: '20px', 
-        borderRadius: '12px' 
-      }}>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '40px', background: '#1a1a1a', padding: '25px', borderRadius: '16px' }}>
         <textarea
           value={newContent}
-          onChange={(e) => setNewContent(e.target.value)}
-          placeholder="Что у тебя нового?"
-          style={{
-            width: '100%',
-            minHeight: '110px',
-            padding: '14px',
-            borderRadius: '8px',
-            background: '#222',
-            color: '#fff',
-            border: '1px solid #444',
-            fontSize: '16px',
-            resize: 'vertical'
-          }}
+          onChange={e => setNewContent(e.target.value)}
+          placeholder="Что у тебя нового сегодня?"
+          style={{ width: '100%', minHeight: '110px', padding: '15px', borderRadius: '12px', background: '#222', color: '#fff', border: 'none', fontSize: '16px' }}
         />
-        <button 
-          type="submit"
-          style={{
-            marginTop: '10px',
-            padding: '12px 24px',
-            background: '#863bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
+        <button type="submit" style={{ marginTop: '12px', padding: '12px 28px', background: '#863bff', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600' }}>
           Опубликовать
         </button>
       </form>
 
       {posts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px', background: '#1a1a1a', borderRadius: '12px' }}>
-          <p>Пока нет постов. Будь первым!</p>
-        </div>
+        <p style={{ textAlign: 'center', color: '#888' }}>Пока нет постов. Будь первым!</p>
       ) : (
-        posts.map((post) => (
-          <div key={post.id} style={{
-            background: '#1a1a1a',
-            padding: '20px',
-            borderRadius: '12px',
-            marginBottom: '20px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <strong style={{ color: '#863bff' }}>@{post.username}</strong>
-              
-              {user && user.id === post.user_id && (
-                <button 
-                  onClick={() => deletePost(post.id)}
-                  style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    color: '#ff4d4d', 
-                    fontSize: '18px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            <p style={{ fontSize: '17px', lineHeight: '1.6', margin: '0 0 12px 0' }}>
-              {post.content}
-            </p>
-
-            <small style={{ color: '#888' }}>
-              {new Date(post.created_at).toLocaleString('ru-RU')}
-            </small>
-          </div>
-        ))
-      )}
-
-      {/* Простая пагинация */}
-      {pagination.totalPages > 1 && (
-        <div style={{ textAlign: 'center', marginTop: '30px' }}>
-          <button 
-            onClick={() => fetchFeed(pagination.currentPage - 1)} 
-            disabled={pagination.currentPage === 1}
-            style={{ marginRight: '10px', padding: '8px 16px' }}
-          >
-            ← Назад
-          </button>
-          <span>Страница {pagination.currentPage} из {pagination.totalPages}</span>
-          <button 
-            onClick={() => fetchFeed(pagination.currentPage + 1)} 
-            disabled={pagination.currentPage === pagination.totalPages}
-            style={{ marginLeft: '10px', padding: '8px 16px' }}
-          >
-            Вперёд →
-          </button>
-        </div>
+        posts.map(post => <PostCard key={post.id} post={post} />)
       )}
     </div>
   );
 };
 
-export default FeedPage;
+export default Feed;

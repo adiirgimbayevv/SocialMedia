@@ -1,80 +1,206 @@
-// src/components/PostCard.jsx
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+// frontend/src/components/PostCard.jsx
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { usePost } from '../context/PostContext';
+import * as commentApi from '../api/comments';
+import * as userApi from '../api/users';
+import Avatar from './Avatar';
 
 const PostCard = ({ post }) => {
-  const { user } = useContext(AuthContext);
-  const { deletePost } = usePost();
+  const { user } = useAuth();                    // ← используем useAuth()
+  const { handleLike, deletePost } = usePost();
+
+  const [comments, setComments] = useState([]);
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const isOwnPost = user && post.user_id === user.id;
+  const likesCount = post.likes_count || 0;
+  const isLiked = post.liked_by_user || false;
+
+  // Загрузка комментариев
+  const loadComments = async () => {
+    setLoadingComments(true);
+    try {
+      const res = await commentApi.fetchComments(post.id);
+      setComments(res.data.data || []);
+    } catch (err) {
+      console.error('Ошибка загрузки комментариев:', err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  // Создание комментария
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    try {
+      await commentApi.createComment(post.id, newComment);
+      setNewComment('');
+      loadComments();           // обновляем комментарии
+    } catch (err) {
+      alert('Не удалось добавить комментарий');
+    }
+  };
+
+  // Подписка / отписка
+const handleFollowToggle = async () => {
+  try {
+    if (isFollowing) {
+      await userApi.unfollowUser(post.user_id);
+      setIsFollowing(false);
+    } else {
+      await userApi.followUser(post.user_id);
+      setIsFollowing(true);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Не удалось изменить подписку. Попробуйте ещё раз.');
+  }
+};
+
+  // Загружаем комментарии, когда открываем блок
+  useEffect(() => {
+    if (showComments) {
+      loadComments();
+    }
+  }, [showComments]);
 
   return (
     <div style={{
       background: '#1a1a1a',
-      borderRadius: '12px',
-      padding: '20px',
-      marginBottom: '20px',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+      borderRadius: '16px',
+      padding: '22px',
+      marginBottom: '25px',
       border: '1px solid #333'
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            background: '#863bff',
-            color: 'white',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            fontSize: '18px'
-          }}>
-            {post.username ? post.username[0].toUpperCase() : '?'}
-          </div>
-          <div>
-            <strong style={{ color: '#fff', fontSize: '16px' }}>@{post.username}</strong>
-            <div style={{ fontSize: '12px', color: '#888' }}>
-              {new Date(post.created_at).toLocaleDateString('ru-RU')} • {new Date(post.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-            </div>
-          </div>
-        </div>
-
-        {isOwnPost && (
-          <button
-            onClick={() => {
-              if (window.confirm('Удалить этот пост?')) {
-                deletePost(post.id);
-              }
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#ff4d4d',
-              fontSize: '20px',
-              cursor: 'pointer',
-              padding: '4px 8px'
-            }}
-          >
-            ✕
-          </button>
-        )}
+      {/* Шапка поста */}
+      {/* Шапка поста — замени только эту часть */}
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+    <Avatar username={post.username} size={50} />
+    <div>
+      <strong>@{post.username}</strong>
+      <div style={{ fontSize: '13px', color: '#888' }}>
+        {new Date(post.created_at).toLocaleString('ru-RU')}
       </div>
+    </div>
+  </div>
 
-      <p style={{
-        fontSize: '17px',
-        lineHeight: '1.6',
-        color: '#e0e0e0',
-        margin: '15px 0'
-      }}>
+  {!isOwnPost && (
+    <button
+      onClick={handleFollowToggle}
+      style={{
+        padding: '8px 20px',
+        background: isFollowing ? '#333' : '#863bff',
+        color: 'white',
+        border: 'none',
+        borderRadius: '20px',
+        fontSize: '14px',
+        cursor: 'pointer',
+        minWidth: '110px'
+      }}
+    >
+      {isFollowing ? 'Отписаться' : 'Подписаться'}
+    </button>
+  )}
+
+  {isOwnPost && (
+    <button onClick={() => deletePost(post.id)} style={{ color: '#ff4d4d', background: 'none', border: 'none', fontSize: '22px' }}>
+      ✕
+    </button>
+  )}
+</div>
+
+      {/* Текст поста */}
+      <p style={{ margin: '15px 0 20px', fontSize: '17px', lineHeight: '1.65' }}>
         {post.content}
       </p>
 
-      <div style={{ fontSize: '13px', color: '#666', marginTop: '10px' }}>
-        Echoes • 2026
+      {/* Действия: лайк и комментарии */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '25px', 
+        paddingTop: '12px', 
+        borderTop: '1px solid #333' 
+      }}>
+        <button
+          onClick={() => handleLike(post.id)}
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            color: isLiked ? '#ff4d4d' : '#aaa', 
+            fontSize: '20px', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          ❤️ <span>{likesCount}</span>
+        </button>
+
+        <button
+          onClick={() => setShowComments(!showComments)}
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            color: '#aaa', 
+            fontSize: '20px', 
+            cursor: 'pointer' 
+          }}
+        >
+          💬 {comments.length}
+        </button>
       </div>
+
+      {/* Блок комментариев */}
+      {showComments && (
+        <div style={{ marginTop: '20px', background: '#111', padding: '18px', borderRadius: '12px' }}>
+          <form onSubmit={handleCommentSubmit} style={{ marginBottom: '15px' }}>
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Напишите комментарий..."
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '10px',
+                background: '#222',
+                color: '#fff',
+                border: 'none',
+                fontSize: '15px'
+              }}
+            />
+          </form>
+
+          {loadingComments ? (
+            <p style={{ color: '#666' }}>Загрузка комментариев...</p>
+          ) : comments.length === 0 ? (
+            <p style={{ color: '#666', fontSize: '14px' }}>Комментариев пока нет. Будьте первым!</p>
+          ) : (
+            comments.map((c) => (
+              <div key={c.id} style={{ 
+                marginBottom: '12px', 
+                padding: '10px', 
+                background: '#1a1a1a', 
+                borderRadius: '8px',
+                fontSize: '15px'
+              }}>
+                <strong>@{c.username}</strong>: {c.content}
+                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  {new Date(c.created_at).toLocaleString('ru-RU')}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 };
