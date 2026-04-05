@@ -26,8 +26,7 @@ export default function App() {
         <Route index element={<FeedPage />} />
         <Route path="posts/:id" element={<PostPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="profile/following" element={<FollowListPage />} />
-        <Route path="profile/followers" element={<FollowListPage />} />
+   <Route path="profile/:type" element={<FollowListPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
