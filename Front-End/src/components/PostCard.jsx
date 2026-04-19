@@ -5,9 +5,10 @@ import { usePost } from '../context/PostContext';
 import * as commentApi from '../api/comments';
 import * as userApi from '../api/users';
 import Avatar from './Avatar';
+import { Link } from 'react-router-dom';
 
 const PostCard = ({ post }) => {
-  const { user } = useAuth();                    // ← используем useAuth()
+  const { user } = useAuth();                   
   const { handleLike, deletePost } = usePost();
 
   const [comments, setComments] = useState([]);
@@ -20,7 +21,6 @@ const PostCard = ({ post }) => {
   const likesCount = post.likes_count || 0;
   const isLiked = post.liked_by_user || false;
 
-  // Загрузка комментариев
   const loadComments = async () => {
     setLoadingComments(true);
     try {
@@ -33,7 +33,7 @@ const PostCard = ({ post }) => {
     }
   };
 
-  // Создание комментария
+  
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -41,13 +41,13 @@ const PostCard = ({ post }) => {
     try {
       await commentApi.createComment(post.id, newComment);
       setNewComment('');
-      loadComments();           // обновляем комментарии
+      loadComments();           
     } catch (err) {
       alert('Не удалось добавить комментарий');
     }
   };
 
-  // Подписка / отписка
+
 const handleFollowToggle = async () => {
   try {
     if (isFollowing) {
@@ -63,12 +63,11 @@ const handleFollowToggle = async () => {
   }
 };
 
-  // Загружаем комментарии, когда открываем блок
+
   useEffect(() => {
-    if (showComments) {
-      loadComments();
-    }
-  }, [showComments]);
+  
+  loadComments(); 
+}, []);
 
   return (
     <div style={{
@@ -78,8 +77,7 @@ const handleFollowToggle = async () => {
       marginBottom: '25px',
       border: '1px solid #333'
     }}>
-      {/* Шапка поста */}
-      {/* Шапка поста — замени только эту часть */}
+
 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
     <Avatar username={post.username} size={50} />
@@ -115,13 +113,12 @@ const handleFollowToggle = async () => {
     </button>
   )}
 </div>
+<Link to={`/post/${post.id}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+  <p style={{ margin: '15px 0 20px', fontSize: '17px', lineHeight: '1.65' }}>
+    {post.content}
+  </p>
+</Link>
 
-      {/* Текст поста */}
-      <p style={{ margin: '15px 0 20px', fontSize: '17px', lineHeight: '1.65' }}>
-        {post.content}
-      </p>
-
-      {/* Действия: лайк и комментарии */}
       <div style={{ 
         display: 'flex', 
         gap: '25px', 

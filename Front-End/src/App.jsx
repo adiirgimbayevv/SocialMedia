@@ -1,14 +1,12 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
-
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import FeedPage from './pages/FeedPage.jsx';
 import PostPage from './pages/PostPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
-import FollowListPage from './pages/FollowListPage.jsx';   // ← Новый
-
+import FollowListPage from './pages/FollowListPage.jsx'; 
 import Layout from './components/Layout.jsx';
 
 function PrivateRoute({ children }) {
@@ -24,9 +22,9 @@ export default function App() {
 
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<FeedPage />} />
-        <Route path="posts/:id" element={<PostPage />} />
+        <Route path="post/:id" element={<PostPage />} />
         <Route path="profile" element={<ProfilePage />} />
-         <Route path="profile/:type" element={<FollowListPage />} />
+        <Route path="profile/:type" element={<FollowListPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

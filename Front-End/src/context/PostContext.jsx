@@ -1,4 +1,3 @@
-// src/context/PostContext.jsx
 import { createContext, useState, useContext, useEffect } from 'react';
 import * as postApi from '../api/posts';
 import { toggleLike } from '../api/likes';

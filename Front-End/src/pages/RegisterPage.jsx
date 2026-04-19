@@ -11,9 +11,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      // Отправляем POST запрос на /auth/register (как в их бэкенде)
       const response = await apiClient.post('/auth/register', {
         username,
         email,
@@ -22,11 +20,9 @@ const Register = () => {
 
       if (response.status === 201) {
         alert('Регистрация успешна! Теперь войдите в аккаунт.');
-        // После регистрации кидаем на страницу логина
         navigate('/login');
       }
     } catch (err) {
-      // Выводим ошибку от бэкенда (например: "not unique email")
       const errorMsg = err.response?.data?.error || 'Ошибка при регистрации';
       alert(errorMsg);
     } finally {
@@ -39,19 +35,19 @@ const Register = () => {
       padding: '40px', 
       maxWidth: '400px', 
       margin: '50px auto', 
-      background: '#222', // Темная тема, как ты любишь
+      background: '#222', 
       borderRadius: '10px',
       color: 'white',
       boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
     }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Create Account</h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Создать аккаунт</h2>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <label>Username</label>
+          <label>Имя пользователя</label>
           <input 
             type="text" 
-            placeholder="Ivan_Ivanov" 
+            placeholder="Ади" 
             required 
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -60,7 +56,7 @@ const Register = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <label>Email</label>
+          <label>Почта</label>
           <input 
             type="email" 
             placeholder="example@mail.com" 
@@ -72,7 +68,7 @@ const Register = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <label>Password</label>
+          <label>Пароль</label>
           <input 
             type="password" 
             placeholder="••••••••" 
@@ -98,18 +94,17 @@ const Register = () => {
             transition: 'background 0.3s'
           }}
         >
-          {loading ? 'Registering...' : 'Sign Up'}
+          {loading ? 'Регистрация...' : 'Зарегистрироваться'}
         </button>
       </form>
 
       <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px' }}>
-        Already have an account? <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Login here</Link>
+        Уже есть аккаунт? <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Войдите здесь</Link>
       </p>
     </div>
   );
 };
 
-// Стили для инпутов, чтобы код был чище
 const inputStyle = {
   padding: '10px',
   borderRadius: '5px',

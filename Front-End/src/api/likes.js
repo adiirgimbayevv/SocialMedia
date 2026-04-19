@@ -1,5 +1,4 @@
-// src/api/likes.js
-import { post, del } from './client.js';
+import { post } from './client.js';
 
 export const toggleLike = (postId) => 
-  post(`posts/${postId}/like`);   // используем POST для toggle
+  post(`posts/${postId}/like`);   

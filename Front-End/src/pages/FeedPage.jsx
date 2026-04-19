@@ -1,32 +1,52 @@
-import { useContext, useState } from 'react';
-import { usePost } from '../context/PostContext';
+import { useState, useEffect } from 'react';
+// Импортируем хуки Redux
+import { useSelector, useDispatch } from 'react-redux';
+// Импортируем экшены из твоего слайса
+import { fetchPosts, addPostAsync } from '../store/postSlice'; 
 import PostCard from '../components/PostCard';
 
 const Feed = () => {
-  const { posts, loading, createPost } = usePost();
   const [newContent, setNewContent] = useState('');
+  const dispatch = useDispatch();
+
+  const { items: posts, loading } = useSelector((state) => state.posts);
+
+  useEffect(() => {
+    dispatch(fetchPosts(1)); 
+  }, [dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newContent.trim()) return;
-    await createPost(newContent);
-    setNewContent('');
+
+    try {
+
+      await dispatch(addPostAsync(newContent)).unwrap(); 
+      setNewContent('');
+    } catch (err) {
+      console.error('Ошибка при создании:', err);
+    }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '60px' }}>Загрузка ленты...</div>;
+  if (loading && posts.length === 0) {
+    return <div style={{ textAlign: 'center', padding: '60px' }}>Загрузка ленты...</div>;
+  }
 
   return (
     <div>
-      {/* Форма создания поста */}
       <form onSubmit={handleSubmit} style={{ marginBottom: '40px', background: '#1a1a1a', padding: '25px', borderRadius: '16px' }}>
         <textarea
           value={newContent}
           onChange={e => setNewContent(e.target.value)}
           placeholder="Что у тебя нового сегодня?"
-          style={{ width: '100%', minHeight: '110px', padding: '15px', borderRadius: '12px', background: '#222', color: '#fff', border: 'none', fontSize: '16px' }}
+          style={{ width: '100%', minHeight: '110px', padding: '15px', borderRadius: '12px', background: '#222', color: '#fff', border: 'none', fontSize: '16px', resize: 'none' }}
         />
-        <button type="submit" style={{ marginTop: '12px', padding: '12px 28px', background: '#863bff', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600' }}>
-          Опубликовать
+        <button 
+          type="submit" 
+          disabled={loading} 
+          style={{ marginTop: '12px', padding: '12px 28px', background: '#863bff', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer' }}
+        >
+          {loading ? 'Публикация...' : 'Опубликовать'}
         </button>
       </form>
 

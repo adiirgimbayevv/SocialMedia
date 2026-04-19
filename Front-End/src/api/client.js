@@ -6,7 +6,6 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Автоматически добавляем токен
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,15 +18,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
+      localStorage.removeItem('token'); 
+      window.location.href = '/login';  
     }
     return Promise.reject(error);
   }
 );
 
-// Экспортируем удобные методы (теперь wrappers будут работать)
 export const get = (url) => apiClient.get(url);
 export const post = (url, data) => apiClient.post(url, data);
 export const put = (url, data) => apiClient.put(url, data);
