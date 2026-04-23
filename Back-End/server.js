@@ -69,7 +69,13 @@ app.put('/users/me', verifyToken, updateProfile);
 
 // --- FOLLOWERS / FOLLOWING ---
 app.get('/users/me/following', verifyToken, getFollowing);   // ← добавь
-app.get('/users/me/followers', verifyToken, getFollowers);  // ← добавь
+app.get('/users/me/followers', verifyToken, getFollowers); // ← добавь
+
+// --- ADMIN ROUTES ---
+import { getAllPostsForAdmin } from './controllers/postsController.js';
+
+// Только для чтения всех постов (для админ-панели)
+app.get('/admin/posts', verifyToken, getAllPostsForAdmin);
 
 // Глобальный обработчик ошибок
 app.use(errorHandler);

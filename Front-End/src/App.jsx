@@ -8,6 +8,8 @@ import PostPage from './pages/PostPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import FollowListPage from './pages/FollowListPage.jsx'; 
 import Layout from './components/Layout.jsx';
+import AdminRoute from './components/AdminRoute.jsx';  
+import AdminPage from './pages/AdminPage.jsx';          
 
 function PrivateRoute({ children }) {
   const { token } = useAuth();
@@ -26,6 +28,15 @@ export default function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="profile/:type" element={<FollowListPage />} />
       </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

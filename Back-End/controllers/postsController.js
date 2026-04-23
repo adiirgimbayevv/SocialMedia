@@ -139,4 +139,26 @@ const deletePost = async (req, res, next) => {
     }
 };
 
-export { getPosts, getPostById, createPost, updatePost, deletePost };
+// Для администратора — получить все посты всех пользователей
+const getAllPostsForAdmin = async (req, res, next) => {
+    try {
+        // Проверяем что это действительно админ
+        const userResult = await db.query('SELECT role FROM users WHERE id = $1', [req.user.id]);
+        if (userResult.rows[0]?.role !== 'admin') {
+            return res.status(403).json({ error: 'Нет доступа' });
+        }
+
+        const result = await db.query(`
+            SELECT posts.*, users.username 
+            FROM posts 
+            JOIN users ON posts.user_id = users.id 
+            ORDER BY posts.created_at DESC
+        `);
+
+        res.json({ data: result.rows });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { getPosts, getPostById, createPost, updatePost, deletePost, getAllPostsForAdmin };
