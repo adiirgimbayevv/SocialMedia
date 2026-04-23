@@ -6,5 +6,5 @@ export const store = configureStore({
   reducer: {
     posts: postReducer,
     ui: uiReducer
-  }
+  },
 });

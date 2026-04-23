@@ -49,7 +49,7 @@ const AdminPage = () => {
         marginBottom: '30px',
         border: '2px solid #ff9900'
       }}>
-        <h1 style={{ color: '#ff9900', margin: 0 }}>⚙️ Админ панель</h1>
+        <h1 style={{ color: '#ff9900', margin: 0 }}> Админ панель</h1>
         <p style={{ color: '#aaa', marginTop: '8px' }}>
           Привет, @{user?.username}! Здесь ты можешь удалять любые посты.
         </p>

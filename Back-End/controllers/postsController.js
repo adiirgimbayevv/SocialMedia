@@ -122,18 +122,28 @@ const updatePost = async (req, res, next) => {
 const deletePost = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const userId = req.user.id;
 
-        const result = await db.query(
-            'DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING id',
-            [id, userId]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(403).json({ error: 'Нет прав на удаление или пост не найден' });
+        // Проверяем что пост существует
+        const post = await db.query('SELECT * FROM posts WHERE id = $1', [id]);
+        if (post.rows.length === 0) {
+            return res.status(404).json({ error: 'Пост не найден' });
         }
 
-        res.json({ message: 'Пост успешно удален', deletedId: id });
+        // Получаем роль пользователя который делает запрос
+        const userResult = await db.query('SELECT role FROM users WHERE id = $1', [req.user.id]);
+        const userRole = userResult.rows[0]?.role;
+
+        // Удалять может либо владелец поста, либо админ
+        const isOwner = post.rows[0].user_id === req.user.id;
+        const isAdmin = userRole === 'admin';
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ error: 'Нет доступа' });
+        }
+
+        await db.query('DELETE FROM posts WHERE id = $1', [id]);
+        res.json({ message: 'Пост удалён' });
+
     } catch (error) {
         next(error);
     }

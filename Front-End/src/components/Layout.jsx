@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import styles from './Layout.module.css';
 
 export default function Layout() {
-  const { user, logout,getRole } = useAuth();
+  const { user, logout, getRole } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -25,7 +25,7 @@ export default function Layout() {
 
       {getRole() === 'admin' && (
               <Link to="/admin" style={{ color: '#ff9900', marginRight: '20px', fontWeight: 'bold' }}>
-                ⚙️ Админ
+                 Админ
               </Link>
             )}
       
