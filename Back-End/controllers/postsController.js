@@ -5,39 +5,38 @@ import db from '../config/db.js';
 const getPosts = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 6;
         const offset = (page - 1) * limit;
         const userId = req.user.id;
 
-        const query = `
+        const result = await db.query(`
             SELECT 
-                p.id, 
-                p.content, 
-                p.created_at, 
-                p.user_id, 
-                u.username,
-                COUNT(l.id) AS likes_count,
-                BOOL_OR(l.user_id = $3) AS liked_by_user
-            FROM posts p
-            JOIN users u ON p.user_id = u.id
-            LEFT JOIN likes l ON l.post_id = p.id
-            GROUP BY p.id, u.username
-            ORDER BY p.created_at DESC
-            LIMIT $1 OFFSET $2
-        `;
-
-        const result = await db.query(query, [limit, offset, userId]);
+                posts.*,
+                users.username,
+                COUNT(DISTINCT likes.id) AS likes_count,
+                BOOL_OR(likes.user_id = $1) AS liked_by_user,
+                -- 👇 НОВОЕ: проверяем подписан ли текущий юзер на автора поста
+                EXISTS(
+                    SELECT 1 FROM follows 
+                    WHERE follower_id = $1 AND following_id = posts.user_id
+                ) AS is_following
+            FROM posts
+            JOIN users ON posts.user_id = users.id
+            LEFT JOIN likes ON likes.post_id = posts.id
+            GROUP BY posts.id, users.username
+            ORDER BY posts.created_at DESC
+            LIMIT $2 OFFSET $3
+        `, [userId, limit, offset]);
 
         const countResult = await db.query('SELECT COUNT(*) FROM posts');
-        const totalPosts = parseInt(countResult.rows[0].count);
+        const total = parseInt(countResult.rows[0].count);
 
         res.json({
             data: result.rows,
             pagination: {
-                totalItems: totalPosts,
                 currentPage: page,
-                totalPages: Math.ceil(totalPosts / limit),
-                itemsPerPage: limit
+                totalPages: Math.ceil(total / limit),
+                total
             }
         });
     } catch (error) {
