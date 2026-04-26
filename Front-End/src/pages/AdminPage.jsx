@@ -10,7 +10,6 @@ const AdminPage = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Какой пост хотим удалить (null = модалка закрыта)
   const [postToDelete, setPostToDelete] = useState(null);
 
   const loadPosts = async () => {

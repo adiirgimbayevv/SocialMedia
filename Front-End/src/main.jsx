@@ -6,7 +6,6 @@ import { store } from './store';
 
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
-import { PostProvider } from './context/PostContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx'; // 👈 НОВЫЙ
 import Toast from './components/Toast.jsx';                  // 👈 НОВЫЙ
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -19,12 +18,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <AuthProvider>
           <ToastProvider>        {/* 👈 оборачиваем */}
-            <PostProvider>
               <ErrorBoundary>
                 <App />
                 <Toast />        {/* 👈 рендерим уведомления глобально */}
               </ErrorBoundary>
-            </PostProvider>
           </ToastProvider>
         </AuthProvider>
       </BrowserRouter>
